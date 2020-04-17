@@ -1,0 +1,14 @@
+<div class="maze" style="grid-template-rows: repeat(<%= @size %>, 1fr); grid-template-columns: repeat(<%= @size %>, 1fr);">
+  <%= for {y, row} <- @maze do %>
+      <%= for {x, cell} <- row do %>
+        <% text = cond do
+          {x, y} == {0, 0} -> "S"
+          {x, y} == {@size - 1, @size - 1} -> "F"
+          true -> ""
+        end %>
+        <span class="cell <%= if cell[:N] do "" else "wall-N" end %> <%= if cell[:S] do "" else "wall-S" end %> <%= if cell[:W] do "" else "wall-W" end %> <%= if cell[:E] do "" else "wall-E" end %> <%= if text == "" do "" else "start-or-end" end %>">
+          <%= text %>
+        </span>
+      <% end %>
+  <% end %>
+</div>

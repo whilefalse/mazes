@@ -1,0 +1,31 @@
+* {
+ margin: 0;
+ padding: 0;
+}
+
+.maze {
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+}
+
+.cell {
+  border: 0px solid black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: sans-serif;
+}
+
+.wall-S {
+  border-bottom-width: 2px;
+}
+.wall-N {
+  border-top-width: 2px;
+}
+.wall-E {
+  border-right-width: 2px;
+}
+.wall-W {
+  border-left-width: 2px;
+}

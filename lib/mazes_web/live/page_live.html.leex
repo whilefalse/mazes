@@ -1,14 +1,40 @@
-<div class="maze" style="grid-template-rows: repeat(<%= @size %>, 1fr); grid-template-columns: repeat(<%= @size %>, 1fr);">
-  <%= for {y, row} <- @maze do %>
-      <%= for {x, cell} <- row do %>
-        <% text = cond do
-          {x, y} == {0, 0} -> "S"
-          {x, y} == {@size - 1, @size - 1} -> "F"
-          true -> ""
-        end %>
-        <span class="cell <%= if cell[:N] do "" else "wall-N" end %> <%= if cell[:S] do "" else "wall-S" end %> <%= if cell[:W] do "" else "wall-W" end %> <%= if cell[:E] do "" else "wall-E" end %> <%= if text == "" do "" else "start-or-end" end %>">
-          <%= text %>
-        </span>
-      <% end %>
+<%= if not @loading do %>
+<style>
+.cell {
+  background-color: <%= @color %>;
+}
+</style>
+<div
+  phx-window-keyup="move_current_location"
+  class="maze"
+  style="grid-template-rows: repeat(<%= @size %>, 1fr); grid-template-columns: repeat(<%= @size %>, 1fr);">
+  <%= for y <- 0..(@size-1) do %>
+      <div class="row">
+        <%= for x <- 0..(@size-1) do %>
+          <% cell = @maze[y][x] %>
+          <% text = cond do
+            {x, y} == @start -> "S"
+            {x, y} == @finish -> "F"
+            Enum.member?(@visited, {x, y}) -> "-"
+            true -> raw("&nbsp;")
+          end %>
+          <diV class="
+            cell
+            <%= if cell[:N] do " open-N" else " wall-N" end %>
+            <%= if cell[:S] do " open-S" else " wall-S" end %>
+            <%= if cell[:W] do " open-W" else " wall-W" end %>
+            <%= if cell[:E] do " open-E" else " wall-E" end %>
+            <%= if text == "" do "" else " start-or-end" end %>
+            <%= if Enum.member?(@visited, {x, y}) do " visited" else "" end %>
+            <%= if @location == {x, y} do " current-location" else "" end %>
+            <%= if @location == @finish do " finished" else "" end %>">
+            <%= text %>
+          </div>
+        <% end %>
+      </div>
   <% end %>
 </div>
+<div class="success <%= if @location == @finish do "" else "hidden" end %>">
+🎉
+</div>
+<% end %>

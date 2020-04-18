@@ -1,18 +1,18 @@
 # Mazes
 
-To start your Phoenix server:
+A simple maze app for my daughter that randomly generates mazes to complete.
 
-  * Setup the project with `mix setup`
-  * Start Phoenix endpoint with `mix phx.server`
+## Features
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+- Random mazes
+- Of random sizes
+- With random backgrounds
+- Rainbows!
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+## To come?
 
-## Learn more
+- Use different maze algorithms to generate mazes with different characteristics
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+## Thanks
+
+Thanks to Jamis Buck for the maze algorithm tips and example code: https://weblog.jamisbuck.org/2010/12/27/maze-generation-recursive-backtracking

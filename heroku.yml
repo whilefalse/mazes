@@ -1,6 +1,0 @@
-build:
-  docker:
-    web: Dockerfile
-  config:
-    MIX_ENV: prod
-    SECRET_KEY_BASE: $SECRET_KEY_BASE

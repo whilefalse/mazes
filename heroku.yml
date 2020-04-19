@@ -4,5 +4,5 @@ build:
   config:
     MIX_ENV: prod
     SECRET_KEY_BASE: $SECRET_KEY_BASE
-  run:
-    web: bin/mazes start
+run:
+  web: bin/mazes start

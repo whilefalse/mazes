@@ -2,6 +2,8 @@
 
 A simple maze app for my daughter that randomly generates mazes to complete.
 
+http://infinite-mazes.herokuapp.com/
+
 ## Features
 
 - Random mazes

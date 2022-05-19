@@ -30,10 +30,23 @@
   vertical-align: middle;
   text-align: center;
   font-weight: bold;
+  background: transparent;
 }
 
-.cell.highlighted {
+.cell-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.cell-inner.highlighted {
   background: transparent;
+}
+
+.highlighted {
+  background: red;
 }
 
 .success {

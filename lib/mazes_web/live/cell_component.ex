@@ -3,19 +3,21 @@ defmodule Mazes.CellComponent do
 
   alias Mazes.Compass
 
+  @spec render(any) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do
     ~H"""
-    <div class={classes(@cell, @highlighted)}>
-      <%= @text %>
+    <div class={classes(@cell)}>
+      <div class={"cell-inner" <> if(@highlighted, do: " highlighted", else: "")}>
+        <%= @text %>
+      </div>
     </div>
     """
   end
 
-  defp classes(cell, highlighted) do
+  defp classes(cell) do
     ["cell"] ++
       (Compass.directions()
        |> Enum.filter(fn d -> !cell[d] end)
-       |> Enum.map(fn d -> "wall-#{d}" end)) ++
-      [if(highlighted, do: "highlighted", else: "")]
+       |> Enum.map(fn d -> "wall-#{d}" end))
   end
 end

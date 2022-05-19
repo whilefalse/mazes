@@ -3,9 +3,9 @@
 }
 
 * {
- margin: 0;
- padding: 0;
- font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
 }
 
 .maze {
@@ -32,7 +32,7 @@
   font-weight: bold;
 }
 
-.cell.visited, .cell.finished {
+.cell.highlighted {
   background: transparent;
 }
 
@@ -47,6 +47,7 @@
   justify-content: center;
   font-size: 200px;
   text-transform: uppercase;
+  background: radial-gradient(red, orange, yellow, green, blue, indigo, violet)
 }
 
 
@@ -57,12 +58,15 @@
 .wall-S {
   border-bottom-width: var(--border-size);
 }
+
 .wall-N {
   border-top-width: var(--border-size);
 }
+
 .wall-E {
   border-right-width: var(--border-size);
 }
+
 .wall-W {
   border-left-width: var(--border-size);
 }

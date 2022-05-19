@@ -13,11 +13,7 @@
               module={Mazes.CellComponent}
               id={cell_id({x,y})}
               cell={@maze[{x,y}]}
-              text={cond do
-                {x, y} == @start -> "S"
-                {x, y} == @finish -> "F"
-                true -> raw("&nbsp;")
-              end}
+              text={text({x,y}, @start, @finish)}
               highlighted={{x, y} == @start} />
           <% end %>
         </div>
@@ -25,5 +21,5 @@
   </div>
   
 
-  <div class={"success #{if @finished, do: "", else: "hidden"}"}>🎉</div>
+  <div class={"success #{if @finished?, do: "", else: "hidden"}"}>🎉</div>
 <% end %>

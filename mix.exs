@@ -42,7 +42,9 @@ defmodule Mazes.MixProject do
       {:telemetry_poller, "~> 0.4"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:stream_data, "~> 0.5", only: :test},
+      {:mox, "~> 1.0", only: :test}
     ]
   end
 

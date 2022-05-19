@@ -15,6 +15,8 @@ config :mazes, MazesWeb.Endpoint,
   pubsub_server: Mazes.PubSub,
   live_view: [signing_salt: "PaxSsjvh"]
 
+config :mazes, :random, Mazes.Random
+
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

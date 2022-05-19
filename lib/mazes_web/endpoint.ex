@@ -10,10 +10,6 @@ defmodule MazesWeb.Endpoint do
     signing_salt: "+/ugXdCP"
   ]
 
-  socket "/socket", MazesWeb.UserSocket,
-    websocket: true,
-    longpoll: false
-
   socket "/live", Phoenix.LiveView.Socket,
     websocket: [connect_info: [session: @session_options], timeout: 45_000]
 

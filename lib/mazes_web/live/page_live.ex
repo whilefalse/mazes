@@ -46,7 +46,7 @@ defmodule MazesWeb.PageLive do
   end
 
   defp new_maze(socket) do
-    size = :rand.uniform(10) + 19
+    size = :rand.uniform(10) + 14
     start = {:rand.uniform(size) - 1, :rand.uniform(size) - 1}
     finish = {:rand.uniform(size) - 1, :rand.uniform(size) - 1}
 

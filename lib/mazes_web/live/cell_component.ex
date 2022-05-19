@@ -6,10 +6,8 @@ defmodule Mazes.CellComponent do
   @spec render(any) :: Phoenix.LiveView.Rendered.t()
   def render(assigns) do
     ~H"""
-    <div class={classes(@cell)}>
-      <div class={"cell-inner" <> if(@highlighted, do: " highlighted", else: "")}>
-        <%= @text %>
-      </div>
+    <div class={classes(@cell)} data-h={@highlighted}>
+      <%= @text %>
     </div>
     """
   end

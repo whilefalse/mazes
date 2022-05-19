@@ -47,6 +47,7 @@ defmodule MazesWeb.PageLive do
     |> assign(:location, start)
     |> assign(:start, start)
     |> assign(:finish, finish)
+    |> assign(:finished, false)
     |> assign(:size, size)
     |> assign(:loading, false)
     |> assign(:color, rand_color())
@@ -67,12 +68,6 @@ defmodule MazesWeb.PageLive do
     new_y = curr_y + Compass.dy(dir)
 
     if can_move?(maze, {curr_x, curr_y}, dir) do
-      case finish do
-        {^new_x, ^new_y} -> send_update(Mazes.SuccessComponent, id: "success", visible: true)
-        {^curr_x, ^curr_y} -> send_update(Mazes.SuccessComponent, id: "success", visible: false)
-        _ -> nil
-      end
-
       if MapSet.member?(visited, {new_x, new_y}) do
         send_update(Mazes.CellComponent, id: cell_id({curr_x, curr_y}), highlighted: false)
         assign(socket, :visited, MapSet.delete(visited, {curr_x, curr_y}))
@@ -81,6 +76,7 @@ defmodule MazesWeb.PageLive do
         assign(socket, :visited, MapSet.put(visited, {new_x, new_y}))
       end
       |> assign(:location, {new_x, new_y})
+      |> assign(:finished, {new_x, new_y} == finish)
     else
       socket
     end

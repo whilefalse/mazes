@@ -24,8 +24,6 @@
     <% end %>
   </div>
   
-  <.live_component
-    module={Mazes.SuccessComponent}
-    id="success"
-    visible={false} />
+
+  <div class={"success #{if @finished, do: "", else: "hidden"}"}>🎉</div>
 <% end %>

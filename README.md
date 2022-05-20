@@ -21,7 +21,7 @@ Thanks to Jamis Buck for the maze algorithm tips and example code: https://weblo
 
 ## Running locally
 
-```elixir
+```
 mix phx.server
 ```
 
@@ -29,6 +29,6 @@ Then browse to http://localhost:4000.
 
 ## Running tests
 
-```elixir
+```
 mix test
 ```

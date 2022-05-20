@@ -1,19 +1,21 @@
-defmodule Mazes.MazeTest do
+defmodule MazeTest do
   use ExUnit.Case, async: true
   use ExUnitProperties
   import StreamData
+
+  alias Mazes.{Compass, Maze, MockRandom, Random}
 
   describe "Deteministic mazes" do
     setup do
       # This deterministic maze always goes in the order N, S, E, W, so it will carve
       # a passage downwards to the bottom wall, move right one, then back up again,
-      # crossing the grid column by column. These assersions check that.
-      Mox.stub(Mazes.MockRandom, :shuffle, fn _ -> [:N, :S, :E, :W] end)
+      # crossing the grid column by column.
+      Mox.stub(MockRandom, :shuffle, fn _ -> [:N, :S, :E, :W] end)
       :ok
     end
 
     test "generates a small expected deterministic maze" do
-      maze = Mazes.Maze.generate(4)
+      maze = Maze.generate(4)
 
       # Expected maze looks like this:
       # |==|==|==|==|
@@ -44,9 +46,9 @@ defmodule Mazes.MazeTest do
     end
 
     test "generates a bigger expected deterministic maze" do
-      size = 100
+      size = 50
       bound = size - 1
-      maze = Mazes.Maze.generate(size)
+      maze = Maze.generate(size)
 
       for x <- 0..bound do
         for y <- 0..bound do
@@ -72,23 +74,39 @@ defmodule Mazes.MazeTest do
   describe "Non deterministic maze properties" do
     setup do
       # Use the real random implementation
-      Mox.stub_with(Mazes.MockRandom, Mazes.Random)
+      Mox.stub_with(MockRandom, Random)
       :ok
+    end
+
+    property "no cell is completely closed" do
+      check all(size <- integer(2..20)) do
+        maze = Maze.generate(size)
+
+        for {_, cell} <- maze do
+          assert Enum.any?(cell, fn {_, val} -> val == true end)
+        end
+      end
     end
 
     property "every cell is reachable" do
       check all(size <- integer(2..20)) do
-        maze = Mazes.Maze.generate(size)
+        maze = Maze.generate(size)
 
-        assert Enum.all?(maze, fn {_, cell} ->
-                 Enum.any?(cell, fn {_dir, val} -> val == true end)
-               end)
+        assert connected?(maze)
+      end
+    end
+
+    property "all nodes are connected" do
+      check all(size <- integer(2..20)) do
+        maze = Maze.generate(size)
+
+        assert connected?(maze)
       end
     end
 
     property "edges of the maze are never breachable" do
-      check all(size <- integer(2..20)) do
-        maze = Mazes.Maze.generate(size)
+      check all(size <- integer(1..20)) do
+        maze = Maze.generate(size)
 
         for i <- 0..(size - 1) do
           assert maze[{i, 0}][:N] == nil
@@ -100,8 +118,228 @@ defmodule Mazes.MazeTest do
       end
     end
 
-    property "there are no cycles" do
-      # TODO
+    property "passages are symetrical" do
+      check all(size <- integer(1..20)) do
+        maze = Maze.generate(size)
+
+        for x <- 0..(size - 1) do
+          for y <- 0..(size - 1) do
+            cell = maze[{x, y}]
+            children = children(maze, {x, y})
+
+            for {dir, child} <- children do
+              assert cell[dir]
+              assert maze[child][Compass.opposite(dir)]
+            end
+          end
+        end
+      end
     end
+
+    property "there are no cycles" do
+      check all(size <- integer(1..20)) do
+        maze = Maze.generate(size)
+
+        refute contains_cycle?(maze)
+      end
+    end
+  end
+
+  describe "contains_cycle?/1 test function" do
+    test "detects a maze with a cycle" do
+      # |==|==|==|
+      # |  |     |
+      # |  |  |  |
+      # |        |
+      # |==|==|==|
+
+      maze = %{
+        {0, 0} => %{S: true},
+        {0, 1} => %{S: true, N: true},
+        {0, 2} => %{E: true, N: true},
+        {1, 2} => %{N: true, E: true, W: true},
+        {1, 1} => %{N: true, S: true},
+        {1, 0} => %{S: true, E: true},
+        {2, 0} => %{W: true, S: true},
+        {2, 1} => %{N: true, S: true},
+        {2, 2} => %{N: true, W: true}
+      }
+
+      assert contains_cycle?(maze)
+    end
+
+    test "correctly says there are no cycles when there isn't one" do
+      # |==|==|==|
+      # |  |  |  |
+      # |  |  |  |
+      # |        |
+      # |==|==|==|
+
+      maze = %{
+        {0, 0} => %{S: true},
+        {0, 1} => %{S: true, N: true},
+        {0, 2} => %{E: true, N: true},
+        {1, 2} => %{N: true, E: true, W: true},
+        {1, 1} => %{N: true, S: true},
+        {1, 0} => %{S: true},
+        {2, 0} => %{S: true},
+        {2, 1} => %{N: true, S: true},
+        {2, 2} => %{N: true, W: true}
+      }
+
+      refute contains_cycle?(maze)
+    end
+  end
+
+  describe "connected?/1 test function" do
+    test "detects a disconnected maze" do
+      # |==|==|==|
+      # |  |  |  |
+      # |  |  |  |
+      # |  |  |  |
+      # |==|==|==|
+
+      maze = %{
+        {0, 0} => %{S: true},
+        {0, 1} => %{S: true, N: true},
+        {0, 2} => %{N: true},
+        {1, 2} => %{N: true},
+        {1, 1} => %{N: true, S: true},
+        {1, 0} => %{S: true},
+        {2, 0} => %{S: true},
+        {2, 1} => %{N: true, S: true},
+        {2, 2} => %{N: true}
+      }
+
+      refute connected?(maze)
+    end
+
+    test "detects a connected maze" do
+      # |==|==|==|
+      # |  |  |  |
+      # |  |  |  |
+      # |        |
+      # |==|==|==|
+
+      maze = %{
+        {0, 0} => %{S: true},
+        {0, 1} => %{S: true, N: true},
+        {0, 2} => %{E: true, N: true},
+        {1, 2} => %{N: true, E: true, W: true},
+        {1, 1} => %{N: true, S: true},
+        {1, 0} => %{S: true},
+        {2, 0} => %{S: true},
+        {2, 1} => %{N: true, S: true},
+        {2, 2} => %{N: true, W: true}
+      }
+
+      assert connected?(maze)
+    end
+
+    test "detects a connected maze with a cycle" do
+      # |==|==|==|
+      # |  |     |
+      # |  |  |  |
+      # |        |
+      # |==|==|==|
+
+      maze = %{
+        {0, 0} => %{S: true},
+        {0, 1} => %{S: true, N: true},
+        {0, 2} => %{E: true, N: true},
+        {1, 2} => %{N: true, E: true, W: true},
+        {1, 1} => %{N: true, S: true},
+        {1, 0} => %{S: true, E: true},
+        {2, 0} => %{W: true, S: true},
+        {2, 1} => %{N: true, S: true},
+        {2, 2} => %{N: true, W: true}
+      }
+
+      assert connected?(maze)
+    end
+
+    test "detects a disconnected maze with a cycle" do
+      # |==|==|==|
+      # |     |  |
+      # |  |  |  |
+      # |     |  |
+      # |==|==|==|
+
+      maze = %{
+        {0, 0} => %{S: true, E: true},
+        {0, 1} => %{S: true, N: true},
+        {0, 2} => %{E: true, N: true},
+        {1, 2} => %{N: true, W: true},
+        {1, 1} => %{N: true, S: true},
+        {1, 0} => %{S: true, W: true},
+        {2, 0} => %{S: true},
+        {2, 1} => %{N: true, S: true},
+        {2, 2} => %{N: true}
+      }
+
+      refute connected?(maze)
+    end
+  end
+
+  @spec contains_cycle?(Maze.t(), MapSet.t(Maze.coord()), Maze.coord(), Maze.coord() | nil) ::
+          boolean()
+  defp contains_cycle?(
+         maze,
+         visited \\ MapSet.new([{0, 0}]),
+         curr_coord \\ {0, 0},
+         parent_coord \\ nil
+       ) do
+    children =
+      children(maze, curr_coord)
+      |> Enum.map(fn {_, child} -> child end)
+      |> Enum.filter(&(&1 != parent_coord))
+
+    if Enum.any?(children, &MapSet.member?(visited, &1)) do
+      true
+    else
+      Enum.any?(
+        children,
+        &contains_cycle?(
+          maze,
+          MapSet.put(visited, &1),
+          &1,
+          curr_coord
+        )
+      )
+    end
+  end
+
+  @spec connected?(Maze.t()) :: boolean
+  defp connected?(maze) do
+    dfs(maze) == MapSet.new(Map.keys(maze))
+  end
+
+  @spec dfs(Maze.t(), MapSet.t(Maze.coord()), Maze.coord()) ::
+          MapSet.t(Maze.coord())
+  defp dfs(maze, visited \\ MapSet.new([{0, 0}]), curr_coord \\ {0, 0}) do
+    children =
+      children(maze, curr_coord)
+      |> Enum.map(fn {_, child} -> child end)
+      |> Enum.filter(&(!MapSet.member?(visited, &1)))
+
+    children
+    |> Enum.reduce(visited, fn child, v ->
+      dfs(maze, MapSet.put(v, child), child)
+    end)
+  end
+
+  @spec children(Maze.t(), Maze.coord()) :: [{Compass.direction(), Maze.coord()}]
+  defp children(maze, {curr_x, curr_y} = curr_coord) do
+    maze[curr_coord]
+    |> Enum.filter(fn {_, v} -> v == true end)
+    |> Enum.map(fn {dir, _} ->
+      {
+        dir,
+        {
+          curr_x + Compass.dx(dir),
+          curr_y + Compass.dy(dir)
+        }
+      }
+    end)
   end
 end

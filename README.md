@@ -4,6 +4,10 @@ A simple maze app for my daughter that randomly generates mazes to complete.
 
 http://infinite-mazes.herokuapp.com/
 
+It only works on devices with arrow keys at the moment.
+
+Written using Phoenix Live View.
+
 ## Features
 
 - Random mazes
@@ -14,6 +18,7 @@ http://infinite-mazes.herokuapp.com/
 ## To come?
 
 - Use different maze algorithms to generate mazes with different characteristics
+- Mobile device support
 
 ## Thanks
 

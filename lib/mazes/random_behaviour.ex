@@ -13,5 +13,5 @@ defmodule Mazes.RandomBehaviour do
   @doc """
   Returns a random integer between the given two integers (inclusive).
   """
-  @callback integer_between(integer(), integer()) :: integer()
+  @callback integer_between(non_neg_integer(), non_neg_integer()) :: non_neg_integer()
 end

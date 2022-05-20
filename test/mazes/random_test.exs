@@ -15,7 +15,7 @@ defmodule Mazes.RandomTest do
   describe "integer_between/2" do
     property "is >= the lower bound" do
       check all(
-              lower <- integer(1..100),
+              lower <- integer(0..100),
               upper <- integer(lower..200)
             ) do
         random = Mazes.Random.integer_between(lower, upper)
@@ -23,9 +23,9 @@ defmodule Mazes.RandomTest do
       end
     end
 
-    property "is <= the lower bound" do
+    property "is <= the upper bound" do
       check all(
-              lower <- integer(1..100),
+              lower <- integer(0..100),
               upper <- integer(lower..200)
             ) do
         random = Mazes.Random.integer_between(lower, upper)
@@ -35,7 +35,7 @@ defmodule Mazes.RandomTest do
 
     property "is an integer" do
       check all(
-              lower <- integer(1..100),
+              lower <- integer(0..100),
               upper <- integer(lower..200)
             ) do
         random = Mazes.Random.integer_between(lower, upper)

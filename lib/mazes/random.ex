@@ -11,6 +11,10 @@ defmodule Mazes.Random do
 
   @impl Mazes.RandomBehaviour
   def integer_between(from, to) do
+    if from > to do
+      raise ArgumentError, message: "`from` is greater than `to` (#{from} > #{to})"
+    end
+
     from + :rand.uniform(to - from + 1) - 1
   end
 end

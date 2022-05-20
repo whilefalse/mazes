@@ -22,7 +22,7 @@ defmodule Mazes.CellComponent do
   defp classes(cell) do
     walls =
       Compass.directions()
-      |> Stream.filter(&cell[&1])
+      |> Stream.reject(&cell[&1])
       |> Enum.map(&"wall-#{&1}")
 
     ["cell" | walls]

@@ -79,25 +79,24 @@ defmodule MazeTest do
     end
 
     property "no cell is completely closed" do
-      check all(size <- integer(2..20)) do
+      check all(size <- maze_sizes_to_test()) do
         maze = Maze.generate(size)
 
-        for {_, cell} <- maze do
-          assert Enum.any?(cell, fn {_, val} -> val == true end)
+        if size == 1 do
+          # A maze of size 1 by definition is just a single square, so this is
+          # the one exception where all cells have a wall.
+          [{{0, 0}, cell}] = Map.to_list(maze)
+          assert cell == %{}
+        else
+          for {_, cell} <- maze do
+            assert Enum.any?(cell, fn {_, val} -> val == true end)
+          end
         end
       end
     end
 
-    property "every cell is reachable" do
-      check all(size <- integer(2..20)) do
-        maze = Maze.generate(size)
-
-        assert connected?(maze)
-      end
-    end
-
     property "all nodes are connected" do
-      check all(size <- integer(2..20)) do
+      check all(size <- maze_sizes_to_test()) do
         maze = Maze.generate(size)
 
         assert connected?(maze)
@@ -105,7 +104,7 @@ defmodule MazeTest do
     end
 
     property "edges of the maze are never breachable" do
-      check all(size <- integer(1..20)) do
+      check all(size <- maze_sizes_to_test()) do
         maze = Maze.generate(size)
 
         for i <- 0..(size - 1) do
@@ -119,7 +118,7 @@ defmodule MazeTest do
     end
 
     property "passages are symetrical" do
-      check all(size <- integer(1..20)) do
+      check all(size <- maze_sizes_to_test()) do
         maze = Maze.generate(size)
 
         for x <- 0..(size - 1) do
@@ -137,7 +136,7 @@ defmodule MazeTest do
     end
 
     property "there are no cycles" do
-      check all(size <- integer(1..20)) do
+      check all(size <- maze_sizes_to_test()) do
         maze = Maze.generate(size)
 
         refute contains_cycle?(maze)
@@ -285,26 +284,23 @@ defmodule MazeTest do
           boolean()
   defp contains_cycle?(
          maze,
-         visited \\ MapSet.new([{0, 0}]),
+         visited \\ MapSet.new([]),
          curr_coord \\ {0, 0},
          parent_coord \\ nil
        ) do
-    children =
-      children(maze, curr_coord)
-      |> Enum.map(fn {_, child} -> child end)
-      |> Enum.filter(&(&1 != parent_coord))
-
-    if Enum.any?(children, &MapSet.member?(visited, &1)) do
+    if MapSet.member?(visited, curr_coord) do
       true
     else
+      new_visited = MapSet.put(visited, curr_coord)
+
+      children =
+        children(maze, curr_coord)
+        |> Enum.map(fn {_, child} -> child end)
+        |> Enum.filter(&(&1 != parent_coord))
+
       Enum.any?(
         children,
-        &contains_cycle?(
-          maze,
-          MapSet.put(visited, &1),
-          &1,
-          curr_coord
-        )
+        &contains_cycle?(maze, new_visited, &1, curr_coord)
       )
     end
   end
@@ -316,15 +312,16 @@ defmodule MazeTest do
 
   @spec dfs(Maze.t(), MapSet.t(Maze.coord()), Maze.coord()) ::
           MapSet.t(Maze.coord())
-  defp dfs(maze, visited \\ MapSet.new([{0, 0}]), curr_coord \\ {0, 0}) do
+  defp dfs(maze, visited \\ MapSet.new([]), curr_coord \\ {0, 0}) do
+    new_visited = MapSet.put(visited, curr_coord)
+
     children =
       children(maze, curr_coord)
       |> Enum.map(fn {_, child} -> child end)
       |> Enum.filter(&(!MapSet.member?(visited, &1)))
 
-    children
-    |> Enum.reduce(visited, fn child, v ->
-      dfs(maze, MapSet.put(v, child), child)
+    Enum.reduce(children, new_visited, fn child, v ->
+      dfs(maze, v, child)
     end)
   end
 
@@ -341,5 +338,10 @@ defmodule MazeTest do
         }
       }
     end)
+  end
+
+  @spec maze_sizes_to_test() :: StreamData.t(integer())
+  defp maze_sizes_to_test() do
+    integer(1..20)
   end
 end

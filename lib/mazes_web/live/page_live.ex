@@ -11,11 +11,7 @@ defmodule MazesWeb.PageLive do
     if connected?(socket) do
       {:ok, new_maze(socket)}
     else
-      {
-        :ok,
-        socket
-        |> assign(:loading, true)
-      }
+      {:ok, assign(socket, :loading, true)}
     end
   end
 
@@ -30,9 +26,10 @@ defmodule MazesWeb.PageLive do
 
   @spec new_maze(Phoenix.LiveView.Socket.t()) :: Phoenix.LiveView.Socket.t()
   defp new_maze(socket) do
-    size = :rand.uniform(10) + 14
-    start = {:rand.uniform(size) - 1, :rand.uniform(size) - 1}
-    finish = {:rand.uniform(size) - 1, :rand.uniform(size) - 1}
+    r = random()
+    size = r.integer_between(15, 20)
+    start = {r.integer_between(0, size - 1), r.integer_between(0, size - 1)}
+    finish = {r.integer_between(0, size - 1), r.integer_between(0, size - 1)}
 
     socket
     |> assign(:maze, Maze.generate(size))
@@ -42,8 +39,8 @@ defmodule MazesWeb.PageLive do
     |> assign(:finish, finish)
     |> assign(:finished?, false)
     |> assign(:size, size)
-    |> assign(:loading, false)
     |> assign(:color, rand_color())
+    |> assign(:loading, false)
   end
 
   @spec move(Phoenix.LiveView.Socket.t(), Compass.direction()) :: Phoenix.LiveView.Socket.t()
@@ -93,7 +90,9 @@ defmodule MazesWeb.PageLive do
 
   @spec rand_color() :: String.t()
   defp rand_color() do
-    "rgb(#{:rand.uniform(192) + 63}, #{:rand.uniform(192) + 63}, #{:rand.uniform(192) + 63})"
+    r = random()
+
+    "rgb(#{r.integer_between(193, 255)}, #{r.integer_between(193, 255)}, #{r.integer_between(193, 255)})"
   end
 
   @spec cell_id(Maze.coord()) :: String.t()
@@ -109,4 +108,6 @@ defmodule MazesWeb.PageLive do
       _ -> raw("&nbsp;")
     end
   end
+
+  defp random(), do: Application.get_env(:mazes, :random)
 end

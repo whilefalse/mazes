@@ -1,4 +1,7 @@
 defmodule MazesWeb.PageLive do
+  @moduledoc """
+  Live view for showing a maze and allowing you to navigate around it.
+  """
   use MazesWeb, :live_view
 
   alias Mazes.{Compass, Maze}
@@ -73,16 +76,18 @@ defmodule MazesWeb.PageLive do
   end
 
   @spec can_move?(Maze.t(), Maze.coord(), Compass.direction()) :: boolean()
-  defp can_move?(maze, {curr_x, curr_y}, dir) do
-    maze[{curr_x, curr_y}][dir]
+  defp can_move?(maze, curr_coord, dir) do
+    maze[curr_coord][dir]
   end
 
   @spec perform_move(MapSet.t(Maze.coord()), Maze.coord(), Maze.coord()) :: MapSet.t(Maze.coord())
   defp perform_move(visited, curr_coord, new_coord) do
     if MapSet.member?(visited, new_coord) do
+      # Moving backwards, so unhighlight the current cell
       send_update(Mazes.CellComponent, id: cell_id(curr_coord), highlighted: false)
       MapSet.delete(visited, curr_coord)
     else
+      # Moving forwards, so highlight the new cell
       send_update(Mazes.CellComponent, id: cell_id(new_coord), highlighted: true)
       MapSet.put(visited, new_coord)
     end

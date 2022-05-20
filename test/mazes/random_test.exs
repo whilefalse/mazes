@@ -42,5 +42,14 @@ defmodule Mazes.RandomTest do
         assert is_integer(random)
       end
     end
+
+    property "throws when lower > upper" do
+      check all(
+              lower <- integer(1..100),
+              upper <- integer(0..(lower - 1))
+            ) do
+        assert_raise ArgumentError, fn -> Mazes.Random.integer_between(lower, upper) end
+      end
+    end
   end
 end

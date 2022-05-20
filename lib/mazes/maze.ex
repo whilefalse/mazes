@@ -41,26 +41,30 @@ defmodule Mazes.Maze do
   end
 
   @spec recursive_carve_passage(Maze.t(), Maze.coord(), integer()) :: Maze.t()
-  defp recursive_carve_passage(grid, {curr_x, curr_y}, size) do
+  defp recursive_carve_passage(grid, {curr_x, curr_y} = curr_corrd, size) do
     Compass.directions()
     |> random().shuffle()
     |> Enum.reduce(grid, fn dir, acc ->
-      next_x = curr_x + Compass.dx(dir)
-      next_y = curr_y + Compass.dy(dir)
+      next_coord = {
+        curr_x + Compass.dx(dir),
+        curr_y + Compass.dy(dir)
+      }
 
-      if next_y >= 0 and next_y < size and
-           next_x >= 0 and next_x < size and
-           Map.get(acc, {next_x, next_y}) == %{} do
+      if in_bounds?(next_coord, size) and Map.get(acc, next_coord) == %{} do
         new_grid =
           acc
-          |> put_in([{curr_x, curr_y}, dir], true)
-          |> put_in([{next_x, next_y}, Compass.opposite(dir)], true)
+          |> put_in([curr_corrd, dir], true)
+          |> put_in([next_coord, Compass.opposite(dir)], true)
 
-        recursive_carve_passage(new_grid, {next_x, next_y}, size)
+        recursive_carve_passage(new_grid, next_coord, size)
       else
         acc
       end
     end)
+  end
+
+  defp in_bounds?({x, y}, size) do
+    x >= 0 and x < size and y >= 0 and y < size
   end
 
   defp random(), do: Application.get_env(:mazes, :random)
